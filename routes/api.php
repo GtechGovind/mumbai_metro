@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\FareController;
 use App\Http\Controllers\StationController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,11 +15,14 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
+// STATIONS
 Route::get('stations', [StationController::class, 'getAllStations']);
 Route::get('stations/{id}', [StationController::class, 'getStation']);
+
+// FARE
 Route::post('fare', [FareController::class, 'getFare']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+//USER
+Route::get('users', [UserController::class, 'getAllUsers']);
+Route::post('user', [UserController::class, 'getUser']);
+Route::post('add_user', [UserController::class, 'addUser']);
