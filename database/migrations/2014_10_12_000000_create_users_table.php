@@ -18,7 +18,8 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->bigInteger('number')->unique();
-            $table->timestamp('number_verified_at');
+            $table->integer('operator');
+            $table->boolean('is_verified')->default(false);
             $table->timestamps();
         });
     }

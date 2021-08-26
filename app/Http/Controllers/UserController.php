@@ -23,34 +23,76 @@ class UserController extends Controller
         $email = $request->input('email');
         $number = $request->input('number');
 
-        return User::all()->where('email', '=', $email)
+        $user = User::all()->where('email', '=', $email)
             ->where('number', '=', $number)
-            ->firstOrFail();
+            ->first();
+
+        if (empty($user)) {
+
+            return json_encode([
+                "status" => false,
+                "message" => "User not found",
+                "error" => "User not found please register"
+            ], JSON_PRETTY_PRINT);
+
+        } else {
+
+            return json_encode([
+                "status" => true,
+                "message" => "User exits",
+                "data" => $user
+            ], JSON_PRETTY_PRINT);
+
+        }
 
     }
 
-    function addUser(Request $request): User
+    /** @noinspection PhpUndefinedFieldInspection */
+    function addUser(Request $request)
     {
 
         $request->validate([
             'name' => 'required',
             'email' => 'required',
-            'number' => 'required'
+            'number' => 'required',
+            'operator' => 'required'
         ]);
 
         $name = $request->input('name');
         $email = $request->input('email');
         $number = $request->input('number');
+        $operator = $request->input('operator');
 
-        $user = new User();
-        $user->name = $name;
-        $user->email = $email;
-        $user->number = $number;
-        $user->number_verified_at = time();
+        $user = User::all() ->where('email', '=', $email)
+                            ->where('number', '=', $number)
+                            ->first();
 
-        $user->save();
+        if (empty($user)) {
 
-        return $user;
+            $new_user = new User();
+
+            $new_user->name = $name;
+            $new_user->email = $email;
+            $new_user->number = $number;
+            $new_user->operator = $operator;
+
+            $new_user->save();
+
+            return json_encode([
+                "status" => true,
+                "message" => "New user is created",
+                "data" => $new_user
+            ], JSON_PRETTY_PRINT);
+
+        } else {
+
+            return json_encode([
+                "status" => true,
+                "message" => "User already exits",
+                "data" => $user
+            ], JSON_PRETTY_PRINT);
+
+        }
 
     }
 }

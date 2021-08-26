@@ -25,4 +25,4 @@ Route::post('fare', [FareController::class, 'getFare']);
 //USER
 Route::get('users', [UserController::class, 'getAllUsers']);
 Route::post('user', [UserController::class, 'getUser']);
-Route::post('add_user', [UserController::class, 'addUser']);
+Route::post('user/add', [UserController::class, 'addUser']);
