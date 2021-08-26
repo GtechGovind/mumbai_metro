@@ -37,10 +37,11 @@ class UserController extends Controller
 
         } else {
 
+
             return json_encode([
                 "status" => true,
                 "message" => "User exits",
-                "data" => $user
+                "user" => $user
             ], JSON_PRETTY_PRINT);
 
         }
@@ -81,7 +82,7 @@ class UserController extends Controller
             return json_encode([
                 "status" => true,
                 "message" => "New user is created",
-                "data" => $new_user
+                "user" => $new_user
             ], JSON_PRETTY_PRINT);
 
         } else {
@@ -89,7 +90,7 @@ class UserController extends Controller
             return json_encode([
                 "status" => true,
                 "message" => "User already exits",
-                "data" => $user
+                "user" => $user
             ], JSON_PRETTY_PRINT);
 
         }

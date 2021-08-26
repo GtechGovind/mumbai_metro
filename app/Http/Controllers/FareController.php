@@ -32,7 +32,7 @@ class FareController extends Controller
             return json_encode([
                 "status" => true,
                 "message" => "Fare for single journey ticket.",
-                "data" => [
+                "fare" => [
                     "ffst" => $ffst,
                     "total_fare" => $ffst * $ticket_count
                 ]
@@ -43,7 +43,7 @@ class FareController extends Controller
             return json_encode([
                 "status" => true,
                 "message" => "Fare for return journey ticket.",
-                "data" => [
+                "fare" => [
                     "ffst" => $ffst,
                     "total_fare" => 2 * $ffst * $ticket_count
                 ]
@@ -53,7 +53,8 @@ class FareController extends Controller
 
             return json_encode([
                 "status" => false,
-                "message" => "Some internal server error"
+                "message" => "Can't get fare",
+                "error" => "Some internal server error"
             ], JSON_PRETTY_PRINT);
 
         }
