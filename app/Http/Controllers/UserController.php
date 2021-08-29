@@ -88,7 +88,7 @@ class UserController extends Controller
         } else {
 
             return json_encode([
-                "status" => true,
+                "status" => false,
                 "message" => "User already exits",
                 "user" => $user
             ], JSON_PRETTY_PRINT);

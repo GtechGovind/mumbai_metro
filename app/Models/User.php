@@ -23,13 +23,4 @@ class User extends Model
         'number_verified_at'
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'number_verified_at' => 'datetime',
-    ];
-
 }
