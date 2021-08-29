@@ -25,7 +25,7 @@ class CreateQrDataTable extends Migration
             $table->integer('ticket_type');
             $table->string('qr_direction');
             $table->text('qr_code_data');
-            $table->integer('qr_status');
+            $table->string('qr_status');
             $table->dateTime('record_date');
             $table->dateTime('slave_expiry_date');
             $table->timestamps();

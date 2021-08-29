@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\FareController;
 use App\Http\Controllers\GenerateQrController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StationController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,9 @@ Route::post('qr/generate', [GenerateQrController::class, 'GenerateQrCode']);
 
 // FARE
 Route::post('fare', [FareController::class, 'getFare']);
+
+// ORDER
+Route::post('order/add', [OrderController::class, 'createOder']);
 
 //USER
 Route::get('users', [UserController::class, 'getAllUsers']);

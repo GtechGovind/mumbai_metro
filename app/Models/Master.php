@@ -9,57 +9,20 @@ class Master extends Model
 {
     use HasFactory;
 
-    /**
-     * @var mixed
-     */
-    public $order_no;
-    /**
-     * @var mixed
-     */
-    public $master_qr_code;
-    /**
-     * @var mixed
-     */
-    public $master_acc_id;
-    /**
-     * @var mixed
-     */
-    public $phone_number;
-    /**
-     * @var mixed
-     */
-    public $source;
-    /**
-     * @var mixed
-     */
-    public $destination;
-    /**
-     * @var mixed
-     */
-    public $ticket_type;
-    /**
-     * @var mixed
-     */
-    public $ticket_count;
-    /**
-     * @var mixed
-     */
-    public $total_fare;
-    /**
-     * @var mixed
-     */
-    public $travel_date;
-    /**
-     * @var mixed
-     */
-    public $master_expiry;
-    /**
-     * @var mixed
-     */
-    public $grace_expiry;
-    /**
-     * @var mixed
-     */
-    public $record_date;
+    protected $fillable = [
+        'order_no',
+        'master_qr_code',
+        'master_acc_id',
+        'phone_number',
+        'source',
+        'destination',
+        'ticket_type',
+        'ticket_count',
+        'total_fare',
+        'travel_date',
+        'master_expiry',
+        'grace_expiry',
+        'record_date',
+    ];
 
 }

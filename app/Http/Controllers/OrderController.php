@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use PDOException;
 
 class OrderController extends Controller
 {
@@ -49,12 +50,26 @@ class OrderController extends Controller
         $newOrder -> order_status = $order_status;
         $newOrder -> order_flag = $order_flag;
 
-        $newOrder -> save();
 
-        return json_encode([
-            "status" => true,
-            "message" => "Order created",
-            "order" => $newOrder
-        ], JSON_PRETTY_PRINT);
+
+        try {
+
+            $newOrder -> save();
+            return json_encode([
+                "status" => true,
+                "message" => "Order created",
+                "order" => $newOrder
+            ], JSON_PRETTY_PRINT);
+
+        } catch (PDOException $e) {
+
+            return json_encode([
+                "status" => false,
+                "message" => "Order creation failed",
+                "order" => $e -> getMessage()
+            ], JSON_PRETTY_PRINT);
+
+        }
+
     }
 }
