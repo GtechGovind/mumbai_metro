@@ -13,7 +13,8 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "ext-json": "*",
-      "ext-curl": "*"
+      "ext-curl": "*",
+      "ext-pdo": "*"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

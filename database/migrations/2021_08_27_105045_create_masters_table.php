@@ -17,7 +17,7 @@ class CreateMastersTable extends Migration
             $table->id();
             $table->string('order_no');
             $table->string('master_qr_code');
-            $table->string('master_tnx_id');
+            $table->string('master_acc_id');
             $table->bigInteger("phone_number");
             $table->integer('source');
             $table->integer('destination');

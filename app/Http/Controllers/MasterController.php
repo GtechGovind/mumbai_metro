@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\ApiHandlar\GenerateQrCode;
-use App\Models\ApiModels\Data;
-use App\Models\ApiModels\issueTokenModel;
-use App\Models\ApiModels\Payment;
 use App\Models\Master;
-use Illuminate\Http\Request;
+use PDOException;
 
 class MasterController extends Controller
 {
-    public function creteMaster(Request $request) {
-
-
-
+    public function populateMasterTable(Master $master): bool
+    {
+        try {
+            $master -> save();
+            return true;
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 }

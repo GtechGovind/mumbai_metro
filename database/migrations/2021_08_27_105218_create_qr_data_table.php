@@ -18,7 +18,7 @@ class CreateQrDataTable extends Migration
             $table->string('order_no');
             $table->string('master_qr_code');
             $table->string('slave_qr_code');
-            $table->string('slave_tnx_id');
+            $table->string('slave_acc_id');
             $table->bigInteger('phone_number');
             $table->integer('source');
             $table->integer('destination');

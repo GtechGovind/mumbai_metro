@@ -6,41 +6,45 @@ use App\Models\ApiModels\Data;
 use App\Models\ApiModels\issueTokenModel;
 use App\Models\ApiModels\Payment;
 use App\Models\Master;
+use App\Models\QrData;
 use Illuminate\Http\Request;
 
 class GenerateQrController extends Controller
 {
-    public function GenerateQrCode(Request $request) {
+    public function GenerateQrCode(Request $request)
+    {
+
+        $requestBody = json_decode($request -> getContent());
+
+        $BASE_URL = env("MMOPL_BASE_API_URL");
+        $AUTHORIZATION = env("MMOPL_BASE_AUTH_KEY");
 
         $data = new Data(
-            $activationTime = $request -> input('data') -> activationTime,
-            $destination = $request -> input('data') -> destination,
-            $email = $request -> input('data') -> email,
-            $fare = $request -> input('data') -> fare,
-            $mobile = $request -> input('data') -> mobile,
-            $name = $request -> input('data') -> name,
-            $operationTypeId = $request -> input('data') -> operationTypeId,
-            $operatorId = $request -> input('data') -> operatorId,
-            $operatorTransactionId = $request -> input('data') -> operatorTransactionId,
-            $qrType = $request -> input('data') -> qrType,
-            $source = $request -> input('data') -> source,
-            $supportType = $request -> input('data') -> supportType,
-            $tokenType = $request -> input('data') -> tokenType,
-            $trips = $request -> input('data') -> trips,
+            $activationTime = $requestBody->data->activationTime,
+            $destination = $requestBody->data->destination,
+            $email = $requestBody->data->email,
+            $fare = $requestBody->data->fare,
+            $mobile = $requestBody->data->mobile,
+            $name = $requestBody->data->name,
+            $operationTypeId = $requestBody->data->operationTypeId,
+            $operatorId = $requestBody->data->operatorId,
+            $operatorTransactionId = $requestBody->data->operatorTransactionId,
+            $qrType = $requestBody->data->qrType,
+            $source = $requestBody->data->source,
+            $supportType = $requestBody->data->supportType,
+            $tokenType = $requestBody->data->tokenType,
+            $trips = $requestBody->data->trips
         );
 
         $payment = new Payment(
-            $pass_price = $request -> input('payment') -> pass_price,
-            $pgId = $request -> input('payment') -> pgId
+            $pass_price = $requestBody->payment->pass_price,
+            $pgId = $requestBody->payment->pgId
         );
 
         $issueTokenModel = new issueTokenModel(
             $data,
             $payment
         );
-
-        $BASE_URL = env("MMOPL_BASE_API_URL");
-        $AUTHORIZATION = env("MMOPL_BASE_AUTH_KEY");
 
         $curl = curl_init();
         curl_setopt_array($curl, [
@@ -52,7 +56,7 @@ class GenerateQrController extends Controller
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => $issueTokenModel,
+            CURLOPT_POSTFIELDS => json_encode($issueTokenModel),
             CURLOPT_HTTPHEADER => [
                 "Authorization:  $AUTHORIZATION",
                 'Content-Type:  application/json'
@@ -62,68 +66,147 @@ class GenerateQrController extends Controller
         $response = curl_exec($curl);
         curl_close($curl);
 
-        $this->populateMaster()
+        $Response = json_decode($response);
+
+        $newMaster = new Master();
+
+        $newMaster->order_no = $requestBody->data->operatorTransactionId;
+        $newMaster->master_qr_code = $Response->data->masterTxnId;
+        $newMaster->master_acc_id = $Response->data->transactionId;
+        $newMaster->phone_number = $requestBody->data->mobile;
+        $newMaster->source = $requestBody->data->source;
+        $newMaster->destination = $requestBody->data->destination;
+        $newMaster->ticket_type = $requestBody->data->tokenType;
+        $newMaster->ticket_count = $requestBody->data->trips;
+        $newMaster->total_fare = $requestBody->data->fare;
+        $newMaster->travel_date = $Response->data->travel_date;
+        $newMaster->master_expiry = $Response->data->master_expiry;
+        $newMaster->grace_expiry = $Response->data->grace_expiry;
+        $newMaster->record_date = $Response->data->record_date;
+
+        (new MasterController)->populateMasterTable($newMaster);
+
+        foreach ($Response->data->trips as $trip) {
+
+            $Qr = new QrData();
+
+            $Qr->order_no = $requestBody->data->operatorTransactionId;
+            $Qr->master_qr_code = $Response->data->masterTxnId;
+            $Qr->slave_qr_code = $trip->qrCodeId;
+            $Qr->slave_acc_id = $trip->transactionId;
+            $Qr->phone_number = $requestBody->data->mobile;
+            $Qr->source = $requestBody->data->source;
+            $Qr->destination = $requestBody->data->destination;
+            $Qr->ticket_type = $requestBody->data->tokenType;
+            $Qr->qr_direction = $trip->type;
+            $Qr->qr_code_data = $trip->qrCodeData;
+            $Qr->qr_status = $trip->tokenStatus;
+            $Qr->record_date = $trip->record_date;
+            $Qr->slave_expiry_date = $trip->expiryTime;
+
+            (new QrDataController)->populateQrData($Qr);
+
+        }
 
         return $response;
     }
 
-    private function populateMaster(Request $request) {
+    /*public function GenerateQrCode(Request $requestBody)
+    {
 
-        $request->validate([
-            'order_no' => 'required',
-            'master_qr_code' => 'required',
-            'master_tnx_id' => 'required',
-            'phone_number' => 'required',
-            'source' => 'required',
-            'destination' => 'required',
-            'ticket_type' => 'required',
-            'ticket_count' => 'required',
-            'total_fare' => 'required',
-            'travel_date' => 'required',
-            'master_expiry' => 'required',
-            'grace_expiry' => 'required',
-            'record_date' => 'required',
+        $BASE_URL = env("MMOPL_BASE_API_URL");
+        $AUTHORIZATION = env("MMOPL_BASE_AUTH_KEY");
+
+        $data = new Data(
+            $activationTime = $requestBody->input('activationTime'),
+            $destination = $requestBody->input('destination'),
+            $email = $requestBody->input('email'),
+            $fare = $requestBody->input('fare'),
+            $mobile = $requestBody->input('mobile'),
+            $name = $requestBody->input('name'),
+            $operationTypeId = $requestBody->input('operationTypeId'),
+            $operatorId = $requestBody->input('operatorId'),
+            $operatorTransactionId = $requestBody->input('operatorTransactionId'),
+            $qrType = $requestBody->input('qrType'),
+            $source = $requestBody->input('source'),
+            $supportType = $requestBody->input('supportType'),
+            $tokenType = $requestBody->input('tokenType'),
+            $trips = $requestBody->input('trips')
+        );
+
+        $payment = new Payment(
+            $pass_price = $requestBody->input('pass_price'),
+            $pgId = $requestBody->input('pgId')
+        );
+
+        $issueTokenModel = new issueTokenModel(
+            $data,
+            $payment
+        );
+
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => "$BASE_URL/qrcode/issueToken",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => json_encode($issueTokenModel),
+            CURLOPT_HTTPHEADER => [
+                "Authorization:  $AUTHORIZATION",
+                'Content-Type:  application/json'
+            ],
         ]);
 
-        $order_no = $request -> input('order_no');
-        $master_qr_code = $request -> input('master_qr_code');
-        $master_tnx_id = $request -> input('master_tnx_id');
-        $phone_number = $request -> input('phone_number');
-        $source = $request -> input('source');
-        $destination = $request -> input('destination');
-        $ticket_type = $request -> input('ticket_type');
-        $ticket_count = $request -> input('ticket_count');
-        $total_fare = $request -> input('total_fare');
-        $travel_date = $request -> input('travel_date');
-        $master_expiry = $request -> input('master_expiry');
-        $grace_expiry = $request -> input('grace_expiry');
-        $record_date = $request -> input('record_date');
+        $response = curl_exec($curl);
+        curl_close($curl);
+
+        $Response = json_decode($response);
 
         $newMaster = new Master();
 
-        $newMaster -> order_no = $order_no;
-        $newMaster -> master_qr_code = $master_qr_code;
-        $newMaster -> master_tnx_id = $master_tnx_id;
-        $newMaster -> phone_number = $phone_number;
-        $newMaster -> source = $source;
-        $newMaster -> destination = $destination;
-        $newMaster -> ticket_type = $ticket_type;
-        $newMaster -> ticket_count = $ticket_count;
-        $newMaster -> total_fare = $total_fare;
-        $newMaster -> travel_date = $travel_date;
-        $newMaster -> master_expiry = $master_expiry;
-        $newMaster -> grace_expiry = $grace_expiry;
-        $newMaster -> record_date = $record_date;
+        $newMaster->order_no = $requestBody->input('operatorTransactionId');
+        $newMaster->master_qr_code = $Response->data->masterTxnId;
+        $newMaster->master_acc_id = $Response->data->transactionId;
+        $newMaster->phone_number = $requestBody->input('mobile');
+        $newMaster->source = $requestBody->input('source');
+        $newMaster->destination = $requestBody->input('destination');
+        $newMaster->ticket_type = $requestBody->input('tokenType');
+        $newMaster->ticket_count = $requestBody->input('trips');
+        $newMaster->total_fare = $requestBody->input('fare');
+        $newMaster->travel_date = $Response->data->travel_date;
+        $newMaster->master_expiry = $Response->data->master_expiry;
+        $newMaster->grace_expiry = $Response->data->grace_expiry;
+        $newMaster->record_date = $Response->data->record_date;
 
-        $newMaster -> save();
+        (new MasterController)->populateMasterTable($newMaster);
 
+        foreach ($Response->data->trips as $trip) {
 
+            $Qr = new QrData();
 
-        return json_encode([
-            "status" => true,
-            "message" => "created new master record",
-            "data" => $newMaster
-        ], JSON_PRETTY_PRINT);
+            $Qr->order_no = $requestBody->input('operatorTransactionId');
+            $Qr->master_qr_code = $Response->data->masterTxnId;
+            $Qr->slave_qr_code = $trip->qrCodeId;
+            $Qr->slave_acc_id = $trip->transactionId;
+            $Qr->phone_number = $requestBody->input('mobile');
+            $Qr->source = $requestBody->input('source');
+            $Qr->destination = $requestBody->input('destination');
+            $Qr->ticket_type = $requestBody->input('tokenType');
+            $Qr->qr_direction = $trip->type;
+            $Qr->qr_code_data = $trip->qrCodeData;
+            $Qr->qr_status = $trip->tokenStatus;
+            $Qr->record_date = $trip->record_date;
+            $Qr->slave_expiry_date = $trip->expiryTime;
 
-    }
+            (new QrDataController)->populateQrData($Qr);
+
+        }
+
+        return $response;
+    }*/
+
 }
