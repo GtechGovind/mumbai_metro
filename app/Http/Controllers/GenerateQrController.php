@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ApiModels\Data;
-use App\Models\ApiModels\issueTokenModel;
-use App\Models\ApiModels\Payment;
+use App\Models\IssueToken\IssueTokenDataModel;
+use App\Models\IssueToken\IssueTokenModel;
+use App\Models\IssueToken\IssueTokenPaymentModel;
 use App\Models\Master;
 use App\Models\QrData;
 use Illuminate\Http\Request;
@@ -19,32 +19,34 @@ class GenerateQrController extends Controller
         $BASE_URL = env("MMOPL_BASE_API_URL");
         $AUTHORIZATION = env("MMOPL_BASE_AUTH_KEY");
 
-        $data = new Data(
-            $activationTime = $requestBody->data->activationTime,
-            $destination = $requestBody->data->destination,
-            $email = $requestBody->data->email,
-            $fare = $requestBody->data->fare,
-            $mobile = $requestBody->data->mobile,
-            $name = $requestBody->data->name,
-            $operationTypeId = $requestBody->data->operationTypeId,
-            $operatorId = $requestBody->data->operatorId,
-            $operatorTransactionId = $requestBody->data->operatorTransactionId,
-            $qrType = $requestBody->data->qrType,
-            $source = $requestBody->data->source,
-            $supportType = $requestBody->data->supportType,
-            $tokenType = $requestBody->data->tokenType,
-            $trips = $requestBody->data->trips
-        );
+        $data = new IssueTokenDataModel();
 
-        $payment = new Payment(
-            $pass_price = $requestBody->payment->pass_price,
-            $pgId = $requestBody->payment->pgId
-        );
+        $data -> activationTime = $requestBody->data->activationTime;
+        $data -> destination = $requestBody->data->destination;
+        $data -> email = $requestBody->data->email;
+        $data -> fare = $requestBody->data->fare;
+        $data -> mobile = $requestBody->data->mobile;
+        $data -> name = $requestBody->data->name;
+        $data -> operationTypeId = $requestBody->data->operationTypeId;
+        $data -> operatorId = $requestBody->data->operatorId;
+        $data -> operatorTransactionId = $requestBody->data->operatorTransactionId;
+        $data -> qrType = $requestBody->data->qrType;
+        $data -> source = $requestBody->data->source;
+        $data -> supportType = $requestBody->data->supportType;
+        $data -> tokenType = $requestBody->data->tokenType;
+        $data -> trips = $requestBody->data->trips;
 
-        $issueTokenModel = new issueTokenModel(
-            $data,
-            $payment
-        );
+        $payment = new IssueTokenPaymentModel();
+
+        $payment -> pass_price = $requestBody->payment->pass_price;
+        $payment -> pgId = $requestBody->payment->pgId;
+
+
+        $issueTokenModel = new IssueTokenModel();
+        $issueTokenModel -> data = $data;
+        $issueTokenModel -> payment = $payment;
+
+        echo print_r($issueTokenModel);
 
         $curl = curl_init();
         curl_setopt_array($curl, [
@@ -56,7 +58,7 @@ class GenerateQrController extends Controller
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => json_encode($issueTokenModel),
+            CURLOPT_POSTFIELDS => $issueTokenModel,
             CURLOPT_HTTPHEADER => [
                 "Authorization:  $AUTHORIZATION",
                 'Content-Type:  application/json'
@@ -66,7 +68,7 @@ class GenerateQrController extends Controller
         $response = curl_exec($curl);
         curl_close($curl);
 
-        $Response = json_decode($response);
+        /*$Response = json_decode($response);
 
         $newMaster = new Master();
 
@@ -106,7 +108,7 @@ class GenerateQrController extends Controller
 
             (new QrDataController)->populateQrData($Qr);
 
-        }
+        }*/
 
         return $response;
     }
