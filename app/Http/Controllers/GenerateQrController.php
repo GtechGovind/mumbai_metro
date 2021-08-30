@@ -100,12 +100,13 @@ class GenerateQrController extends Controller
 
             }
 
-            return $response;
+            $newResponse = json_decode($response, true);
+            $newResponse['order_no'] = $requestBody->data->operatorTransactionId;
+            return json_encode($newResponse);
 
         } else if ($Response->status == "BSE") {
 
             return $response;
-
         }
 
         return json_encode(["status" => "failed", "message" => "Can't generate QR code!", "error" => "Internal server error!"], JSON_PRETTY_PRINT);

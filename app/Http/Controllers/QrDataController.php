@@ -3,17 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\QrData;
-use PDOException;
+use Illuminate\Http\Request;
 
 class QrDataController extends Controller
 {
-    public function populateQrData(QrData $qrData): bool
+    public function getQrData(Request $request)
     {
-        try {
-            $qrData -> save();
-            return true;
-        } catch (PDOException $e) {
-            return false;
-        }
+        $request->validate([
+            'order_no' => 'required',
+        ]);
+
+        $order_no = $request->input('order_no');
+        return QrData::all()->where('order_no', '=', $order_no)  -> toJson();
+
     }
 }
