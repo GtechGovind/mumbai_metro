@@ -1,0 +1,22 @@
+SUCCESS CODES
+100 -> User exits, details fetched successfully.
+200 -> User created successfully.
+
+3001 -> Fetched fare successfully single journey.
+3002 -> Fetched fare successfully return journey.
+
+400 -> Order created successfully.
+
+
+
+
+ERROR_CODES
+101 -> User not found please register.
+102 -> Email does not match.
+
+201 -> User already exits please log in.
+202 -> Email is already registered please try with different email!
+
+301 -> Can't get fare.
+
+401 -> failed to generate order.

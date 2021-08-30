@@ -50,14 +50,13 @@ class OrderController extends Controller
         $newOrder -> order_status = $order_status;
         $newOrder -> order_flag = $order_flag;
 
-
-
         try {
 
             $newOrder -> save();
             return json_encode([
                 "status" => true,
                 "message" => "Order created",
+                "code" => 400,
                 "order" => $newOrder
             ], JSON_PRETTY_PRINT);
 
@@ -66,10 +65,10 @@ class OrderController extends Controller
             return json_encode([
                 "status" => false,
                 "message" => "Order creation failed",
-                "order" => $e -> getMessage()
+                "code" => 401,
+                "order" => $e->getMessage()
             ], JSON_PRETTY_PRINT);
 
         }
-
     }
 }

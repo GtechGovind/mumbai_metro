@@ -1,9 +1,10 @@
-<?php
+<?php /** @noinspection PhpUndefinedFieldInspection */
 
 namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use PDOException;
 
 class UserController extends Controller
 {
@@ -23,32 +24,32 @@ class UserController extends Controller
         $email = $request->input('email');
         $number = $request->input('number');
 
-        $user = User::all()->where('email', '=', $email)
-            ->where('number', '=', $number)
+        $user = User::all()->where('number', '=', $number)
             ->first();
 
-        if (empty($user)) {
+        if (empty($user)) return json_encode([
+            "status" => false,
+            "message" => "User not found please register.",
+            "code" => 101,
+            "error" => "User not found"
+        ], JSON_PRETTY_PRINT);
 
-            return json_encode([
-                "status" => false,
-                "message" => "User not found",
-                "error" => "User not found please register"
-            ], JSON_PRETTY_PRINT);
+        else if ($user->email != $email) return json_encode([
+            "status" => false,
+            "message" => "Email does not match.",
+            "code" => 102,
+            "error" => "wrong email is provided!"
+        ], JSON_PRETTY_PRINT);
 
-        } else {
-
-
-            return json_encode([
-                "status" => true,
-                "message" => "User exits",
-                "user" => $user
-            ], JSON_PRETTY_PRINT);
-
-        }
+        else return json_encode([
+            "status" => true,
+            "message" => "User exits, details fetched successfully.",
+            "code" => 100,
+            "user" => $user
+        ], JSON_PRETTY_PRINT);
 
     }
 
-    /** @noinspection PhpUndefinedFieldInspection */
     function addUser(Request $request)
     {
 
@@ -64,9 +65,8 @@ class UserController extends Controller
         $number = $request->input('number');
         $operator = $request->input('operator');
 
-        $user = User::all() ->where('email', '=', $email)
-                            ->where('number', '=', $number)
-                            ->first();
+        $user = User::all()->where('number', '=', $number)
+            ->first();
 
         if (empty($user)) {
 
@@ -77,23 +77,35 @@ class UserController extends Controller
             $new_user->number = $number;
             $new_user->operator = $operator;
 
-            $new_user->save();
+            try {
 
-            return json_encode([
-                "status" => true,
-                "message" => "New user is created",
-                "user" => $new_user
-            ], JSON_PRETTY_PRINT);
+                $new_user->save();
 
-        } else {
+                return json_encode([
+                    "status" => true,
+                    "message" => "User created successfully..",
+                    "code" => 201,
+                    "user" => $new_user
+                ], JSON_PRETTY_PRINT);
 
-            return json_encode([
-                "status" => false,
-                "message" => "User already exits",
-                "user" => $user
-            ], JSON_PRETTY_PRINT);
+            } catch (PDOException $e) {
 
-        }
+                return json_encode([
+                    "status" => false,
+                    "message" => "Email is already registered please try with different email!",
+                    "code" => 202,
+                    "error" => $e->getMessage()
+                ], JSON_PRETTY_PRINT);
+
+            }
+
+
+        } else return json_encode([
+            "status" => false,
+            "message" => "User already exits please log in.",
+            "code" => 201,
+            "error" => "User already exits please log in."
+        ], JSON_PRETTY_PRINT);
 
     }
 }

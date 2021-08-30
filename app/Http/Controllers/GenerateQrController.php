@@ -11,13 +11,13 @@ class GenerateQrController extends Controller
     public function GenerateQrCode(Request $request)
     {
 
+        $BASE_URL = env("MMOPL_BASE_API_URL");
+        $AUTHORIZATION = env("MMOPL_BASE_AUTH_KEY");
+
         $requestBody = json_decode($request->getContent());
 
         $newMaster = new Master();
         $Qr = new QrData();
-
-        $BASE_URL = env("MMOPL_BASE_API_URL");
-        $AUTHORIZATION = env("MMOPL_BASE_AUTH_KEY");
 
         $curl = curl_init();
         curl_setopt_array($curl, [
@@ -25,7 +25,7 @@ class GenerateQrController extends Controller
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
+            CURLOPT_TIMEOUT => 2000,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
@@ -109,8 +109,10 @@ class GenerateQrController extends Controller
             return $response;
         }
 
-        return json_encode(["status" => "failed", "message" => "Can't generate QR code!", "error" => "Internal server error!"], JSON_PRETTY_PRINT);
-
+        return json_encode([
+            "status" => "failed",
+            "message" => "Can't generate QR code!",
+            "error" => "Internal server error!"],
+            JSON_PRETTY_PRINT);
     }
-
 }
