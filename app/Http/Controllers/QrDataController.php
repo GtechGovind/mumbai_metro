@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\QrData;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class QrDataController extends Controller
 {
@@ -15,7 +15,9 @@ class QrDataController extends Controller
 
         $order_no = $request->input('order_no');
 
-        $qrs = QrData::all()->where('order_no', '=', $order_no);
+        $qrs = DB::table('qr_data')
+            ->where('order_no', '=', $order_no)
+            ->get();
 
         if (empty($qrs)) return json_encode([
             "status" => false,

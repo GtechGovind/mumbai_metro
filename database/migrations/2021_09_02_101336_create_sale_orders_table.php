@@ -17,7 +17,7 @@ class CreateSaleOrdersTable extends Migration
             $table->id();
             $table->string("order_no")->unique();
             $table->bigInteger('phone_number');
-            $table->string("pg_order_id")->unique();
+            $table->string("pg_order_id")->nullable();
             $table->integer("source");
             $table->integer("destination");
             $table->integer("ticket_count");

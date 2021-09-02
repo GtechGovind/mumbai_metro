@@ -16,9 +16,6 @@ class GenerateQrController extends Controller
 
         $requestBody = json_decode($request->getContent());
 
-        $newMaster = new Master();
-
-
         $curl = curl_init();
         curl_setopt_array($curl, [
             CURLOPT_URL => "$BASE_URL/qrcode/issueToken",
@@ -44,7 +41,7 @@ class GenerateQrController extends Controller
                     "source"                : "' . $requestBody->data->source . '",
                     "supportType"           : "' . $requestBody->data->supportType . '",
                     "tokenType"             : "' . $requestBody->data->tokenType . '",
-                    "trips"                 : "' . $requestBody->data->tokenType . '"
+                    "trips"                 : "' . $requestBody->data->trips . '"
                 },
                 "payment": {
                     "pass_price"            : "' . $requestBody->payment->pass_price . '",
@@ -63,6 +60,8 @@ class GenerateQrController extends Controller
         $Response = json_decode($response);
 
         if ($Response->status == "OK") {
+
+            $newMaster = new Master();
 
             $newMaster->order_no = $requestBody->data->operatorTransactionId;
             $newMaster->master_qr_code = $Response->data->masterTxnId;

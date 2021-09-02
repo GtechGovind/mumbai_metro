@@ -13,7 +13,6 @@ class OrderController extends Controller
         $request->validate([
             'order_no' => 'required',
             'phone_number' => 'required',
-            'pg_order_id' => 'required',
             'source' => 'required',
             'destination' => 'required',
             'ticket_count' => 'required',
