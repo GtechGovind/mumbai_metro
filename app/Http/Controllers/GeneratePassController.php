@@ -3,25 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Master;
-use App\Models\QrData;
+use App\Models\PassData;
 use Illuminate\Http\Request;
 
-class GenerateQrController extends Controller
+class GeneratePassController extends Controller
 {
-    public function GenerateQrCode(Request $request)
+    public function generatePass(Request $request)
     {
-
         $BASE_URL = env("MMOPL_BASE_API_URL");
         $AUTHORIZATION = env("MMOPL_BASE_AUTH_KEY");
 
         $requestBody = json_decode($request->getContent());
 
-        $newMaster = new Master();
-
-
         $curl = curl_init();
         curl_setopt_array($curl, [
-            CURLOPT_URL => "$BASE_URL/qrcode/issueToken",
+            CURLOPT_URL => "$BASE_URL/qrcode/issuePass",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -62,7 +58,26 @@ class GenerateQrController extends Controller
 
         $Response = json_decode($response);
 
+        $newPass = new PassData();
+
+        $newPass->order_no = $requestBody->data->operatorTransactionId;
+        $newPass->phone_number = $requestBody->data->mobile;
+        $newPass->master_qr_code = $Response->masterTxnId;
+        $newPass->acc_id = $Response->transactionId;
+        $newPass->pass_price = $Response->amount;
+        $newPass->balance = $Response->balance;
+        $newPass->reg_fees = $Response->registrationFee;
+        $newPass->trips = 0;
+        $newPass->operator_id = $Response->operator_id;
+        $newPass->travel_date = date('y-m-d h:i:m', $Response->data->travelDate);
+        $newPass->master_expiry = date('y-m-d h:i:m', $Response->data->masterExpiry);
+        $newPass->grace_expiry = date('y-m-d h:i:m', $Response->data->graceExpiry);
+
+        $newPass->save();
+
         if ($Response->status == "OK") {
+
+            $newMaster = new Master();
 
             $newMaster->order_no = $requestBody->data->operatorTransactionId;
             $newMaster->master_qr_code = $Response->data->masterTxnId;
@@ -79,28 +94,6 @@ class GenerateQrController extends Controller
             $newMaster->record_date = date('y-m-d h:i:m', $Response->data->timestamp);
 
             $newMaster->save();
-
-            foreach ($Response->data->trips as $trip) {
-
-                $Qr = new QrData();
-
-                $Qr->order_no = $requestBody->data->operatorTransactionId;
-                $Qr->master_qr_code = $Response->data->masterTxnId;
-                $Qr->slave_qr_code = $trip->qrCodeId;
-                $Qr->slave_acc_id = $trip->transactionId;
-                $Qr->phone_number = $requestBody->data->mobile;
-                $Qr->source = $requestBody->data->source;
-                $Qr->destination = $requestBody->data->destination;
-                $Qr->ticket_type = $requestBody->data->tokenType;
-                $Qr->qr_direction = $trip->type;
-                $Qr->qr_code_data = $trip->qrCodeData;
-                $Qr->qr_status = $trip->tokenStatus;
-                $Qr->record_date = date('y-m-d h:i:m', $trip->issueTime);
-                $Qr->slave_expiry_date = date('y-m-d h:i:m', $trip->expiryTime);
-
-                $Qr->save();
-
-            }
 
             $newResponse = json_decode($response, true);
             $newResponse['order_no'] = $requestBody->data->operatorTransactionId;
